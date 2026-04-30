@@ -208,8 +208,6 @@ ORDER BY gender, employee_status;
 | Male   | Hired           | 4319           |
 | Male   | Terminated      | 514            |
 
-> ⚠️ **Bug fix (BUG-2):** Query asli menggunakan label `'Active'`. Dikoreksi menjadi `'Hired'` agar Tableau cross-filter actions antar sheet bekerja dengan benar.
-
 **Insight:** Tenaga kerja 54% Pria dan 46% Wanita. Kedua gender menunjukkan rasio retensi yang hampir identik (~89%), mengindikasikan retensi yang adil lintas gender.
 
 ---
@@ -248,8 +246,6 @@ ORDER BY
 | 35-44     | Bachelor        | 1534           |
 | 35-44     | PhD             | 287            |
 | ...       | ...             | ...            |
-
-> ⚠️ **Bug fix (BUG-3):** Pengurutan langsung pada string `age_group` akan menempatkan `'<25'` setelah `'55+'` karena karakter `<` (ASCII 60) lebih besar dari `5` (ASCII 53). Diganti dengan ekspresi `CASE` eksplisit.
 
 **Insight:** Pemegang gelar Bachelor mendominasi hampir semua kelompok usia. Konsentrasi PhD terlihat lebih tinggi di rentang usia 35–54, yang masuk akal mengingat waktu yang dibutuhkan untuk menyelesaikan gelar tersebut.
 
@@ -382,8 +378,6 @@ FROM (
 | 00-42868828  | John Taylor      | 37  | IT               | 107520 | Terminated        | 2         |
 | ...          | ...              | ... | ...              | ...    | ...               | ...       |
 
-> ⚠️ **Bug fix (BUG-1):** Di PostgreSQL, pengurangan dua nilai `DATE` menghasilkan `INTEGER` (jumlah hari), **bukan** `INTERVAL`. Menggunakan `EXTRACT(day FROM (date - date))` akan memunculkan runtime error. Fix: bagi integer tersebut dengan `365.25` lalu gunakan `FLOOR()`.
-
 ---
 
 ### E2 · Parameterized Filter Query (Tableau Custom SQL)
@@ -413,15 +407,6 @@ SELECT DISTINCT state       FROM dataset ORDER BY state;
 SELECT DISTINCT city        FROM dataset ORDER BY city;
 ```
 
----
-
-## Bug Fixes
-
-| ID | File | Masalah | Fix |
-|---|---|---|---|
-| BUG-1 | `4_details_employee_list.sql` | `EXTRACT(day FROM (date - date))` error — `DATE - DATE` di PostgreSQL = `INTEGER` bukan `INTERVAL` | Ganti dengan `(date - date) / 365.25` |
-| BUG-2 | `2_summary_demographics.sql` | D2 menggunakan label `'Active'`, merusak Tableau cross-filter | Ubah label menjadi `'Hired'` |
-| BUG-3 | `2_summary_demographics.sql` | `ORDER BY age_group` string menempatkan `'<25'` setelah `'55+'` (ASCII sort) | Ganti dengan ekspresi `CASE` eksplisit |
 
 ---
 
