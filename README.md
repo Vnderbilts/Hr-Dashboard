@@ -3,7 +3,7 @@
 Proyek portfolio end-to-end yang menggabungkan **PostgreSQL** untuk analisis data dan **Tableau** untuk visualisasi interaktif. Dataset berisi **8.950 catatan karyawan** yang dibuat secara sintetis menggunakan Python.
 
 🔍 SQL files: [`/sql`](/sql/)  
-📊 Tableau Dashboard: [View on Tableau Public](#) *(tambahkan link Anda di sini)*
+📊 Tableau Dashboard: [View on Tableau Public](https://public.tableau.com/views/HRViz_17775625237690/HRSummary?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
 
 ---
 
