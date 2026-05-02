@@ -35,12 +35,10 @@ RESULTS
 */
 SELECT
   employee_id,
-  CONCAT(first_name, ' ', last_name)                    AS employee_name,
+  CONCAT(first_name, ' ', last_name) AS employee_name,
   EXTRACT(YEAR FROM AGE(
-    CURRENT_DATE,
-    TO_DATE(birthdate, 'DD/MM/YYYY')
-  ))::int                                               AS age,
-  salary::numeric                                       AS salary,
+    CURRENT_DATE, birthdate ))::int AS age,
+  salary::numeric AS salary,
   job_title
 FROM dataset
 WHERE birthdate IS NOT NULL
