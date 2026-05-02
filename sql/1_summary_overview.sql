@@ -35,7 +35,7 @@ RESULTS
 */
 SELECT COUNT(*) AS total_terminated
 FROM dataset
-WHERE NULLIF(termdate, '') IS NOT NULL;
+WHERE termdate IS NOT NULL;
 
 /*
 RESULTS
@@ -51,8 +51,8 @@ RESULTS
   - Digunakan untuk trend line hiring (warna emas)
 */
 SELECT
-  DATE_TRUNC('month', TO_DATE(hiredate, 'DD/MM/YYYY'))::date  AS month_start,
-  COUNT(*)                                                     AS hired_count
+  DATE_TRUNC('month', hiredate)::date AS month_start,
+  COUNT(*) AS hired_count
 FROM dataset
 GROUP BY 1
 ORDER BY 1;
@@ -74,10 +74,10 @@ RESULTS (sample)
   - Digunakan untuk trend line terminasi (warna merah)
 */
 SELECT
-  DATE_TRUNC('month', TO_DATE(NULLIF(termdate, ''), 'DD/MM/YYYY'))::date  AS month_start,
-  COUNT(*)                                                                  AS terminated_count
+  DATE_TRUNC('month', termdate)::date  AS month_start,
+  COUNT(*) AS terminated_count
 FROM dataset
-WHERE NULLIF(termdate, '') IS NOT NULL
+WHERE termdate IS NOT NULL
 GROUP BY 1
 ORDER BY 1;
 
@@ -99,8 +99,8 @@ RESULTS (sample)
 */
 SELECT
   department,
-  SUM(CASE WHEN NULLIF(termdate, '') IS NULL     THEN 1 ELSE 0 END) AS hired_count,
-  SUM(CASE WHEN NULLIF(termdate, '') IS NOT NULL THEN 1 ELSE 0 END) AS terminated_count,
+  SUM(CASE WHEN termdate IS NULL     THEN 1 ELSE 0 END) AS hired_count,
+  SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) AS terminated_count,
   COUNT(*)                                                           AS total_count
 FROM dataset
 GROUP BY department
