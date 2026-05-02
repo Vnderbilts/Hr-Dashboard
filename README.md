@@ -65,7 +65,7 @@ Tiga angka utama di bagian atas dashboard — berapa yang aktif, total pernah di
 -- O1. Karyawan Aktif
 SELECT COUNT(*) AS active_employee
 FROM dataset
-WHERE NULLIF(termdate, '') IS NULL;
+WHERE termdate IS NULL;
 
 -- O2. Total Pernah Direkrut
 SELECT COUNT(*) AS total_hired
@@ -74,7 +74,7 @@ FROM dataset;
 -- O3. Total Terminasi
 SELECT COUNT(*) AS total_terminated
 FROM dataset
-WHERE NULLIF(termdate, '') IS NOT NULL;
+WHERE termdate IS NOT NULL;
 ```
 
 | active_employee | total_hired | total_terminated |
@@ -92,17 +92,17 @@ Dua trend line — emas untuk hiring, merah untuk terminasi — menggambarkan mo
 ```sql
 -- O4. Trend Hiring per Bulan
 SELECT
-  DATE_TRUNC('month', TO_DATE(hiredate, 'DD/MM/YYYY'))::date  AS month_start,
+  DATE_TRUNC('month', hiredate)::date  AS month_start,
   COUNT(*)                                                     AS hired_count
 FROM dataset
 GROUP BY 1 ORDER BY 1;
 
 -- O5. Trend Terminasi per Bulan
 SELECT
-  DATE_TRUNC('month', TO_DATE(NULLIF(termdate, ''), 'DD/MM/YYYY'))::date  AS month_start,
+  DATE_TRUNC('month', termdate)::date  AS month_start,
   COUNT(*)                                                                  AS terminated_count
 FROM dataset
-WHERE NULLIF(termdate, '') IS NOT NULL
+WHERE termdate IS NOT NULL
 GROUP BY 1 ORDER BY 1;
 ```
 
@@ -122,8 +122,8 @@ GROUP BY 1 ORDER BY 1;
 ```sql
 SELECT
   department,
-  SUM(CASE WHEN NULLIF(termdate, '') IS NULL     THEN 1 ELSE 0 END) AS hired_count,
-  SUM(CASE WHEN NULLIF(termdate, '') IS NOT NULL THEN 1 ELSE 0 END) AS terminated_count,
+  SUM(CASE WHEN termdate IS NULL THEN 1 ELSE 0 END) AS hired_count,
+  SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) AS terminated_count,
   COUNT(*)                                                           AS total_count
 FROM dataset
 GROUP BY department
@@ -184,11 +184,11 @@ GROUP BY gender;
 -- D2. Gender × Status (Sumber Dual Donut)
 SELECT
   gender,
-  CASE WHEN NULLIF(termdate, '') IS NULL THEN 'Hired' ELSE 'Terminated' END AS employee_status,
+  CASE WHEN termdate IS NULL THEN 'Hired' ELSE 'Terminated' END AS employee_status,
   COUNT(*) AS employee_count
 FROM dataset
 GROUP BY gender,
-         CASE WHEN NULLIF(termdate, '') IS NULL THEN 'Hired' ELSE 'Terminated' END
+         CASE WHEN termdate IS NULL THEN 'Hired' ELSE 'Terminated' END
 ORDER BY gender, employee_status;
 ```
 
@@ -219,10 +219,10 @@ SELECT age_group, education_level, COUNT(*) AS employee_count
 FROM (
   SELECT education_level,
     CASE
-      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY'))) < 25              THEN '<25'
-      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY'))) BETWEEN 25 AND 34 THEN '25-34'
-      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY'))) BETWEEN 35 AND 44 THEN '35-44'
-      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY'))) BETWEEN 45 AND 54 THEN '45-54'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) < 25 THEN '<25'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 25 AND 34 THEN '25-34'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 35 AND 44 THEN '35-44'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 45 AND 54 THEN '45-54'
       ELSE '55+'
     END AS age_group
   FROM dataset
@@ -315,13 +315,12 @@ ORDER BY education_level, gender;
 ```sql
 SELECT
   employee_id,
-  CONCAT(first_name, ' ', last_name)                    AS employee_name,
+  CONCAT(first_name, ' ', last_name) AS employee_name,
   EXTRACT(YEAR FROM AGE(
-    CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY')
-  ))::int                                               AS age,
-  salary::numeric                                       AS salary,
+    CURRENT_DATE, birthdate))::int AS age,
+  salary::numeric AS salary,
   job_title
-FROM dataset
+FROM hr_dataset
 WHERE birthdate IS NOT NULL AND salary IS NOT NULL
 ORDER BY age;
 ```
@@ -365,10 +364,10 @@ SELECT
   END                                 AS length_of_employment_years
 FROM (
   SELECT *,
-    TO_DATE(hiredate,             'DD/MM/YYYY') AS hire_date,
-    TO_DATE(NULLIF(termdate, ''), 'DD/MM/YYYY') AS term_date,
-    EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(birthdate, 'DD/MM/YYYY')))::int AS age
-  FROM dataset
+    hiredate AS hire_date,
+    termdate AS term_date,
+    EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate))::int AS age
+  FROM hr_dataset
 ) base;
 ```
 
